@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>フリー室3 今すぐ予約</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body { background: #f7f9fc; }
+    .wrap { max-width: 1180px; margin: 0 auto; padding: 14px; }
+    .brand-area { display: flex; align-items: center; gap: 16px; min-width: 0; }
+    .brand-logo { width: min(220px, 42vw); height: auto; display: block; }
+    .brand-copy { border-left: 1px solid #dbe3ef; padding-left: 16px; }
+    .card { border: 0; border-radius: 18px; box-shadow: 0 8px 24px rgba(0,0,0,.07); }
+    iframe { width: 100%; min-height: 620px; border: 0; border-radius: 14px; background: #fff; }
+    .big-time { font-size: clamp(2rem, 5vw, 4rem); font-weight: 800; line-height: 1; }
+    .btn-reserve { font-size: 1.35rem; padding: 16px; border-radius: 14px; }
+    .usage-box {
+      position: relative;
+      overflow: hidden;
+      border-radius: 24px;
+      padding: 22px;
+      min-height: 245px;
+      border: 0;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,.2), 0 12px 30px rgba(15,23,42,.14);
+    }
+    .usage-box::before {
+      content: '';
+      position: absolute;
+      inset: -35% -20% auto auto;
+      width: 230px;
+      height: 230px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.14);
+    }
+    .usage-box::after {
+      content: '';
+      position: absolute;
+      right: 20px;
+      bottom: 18px;
+      width: 84px;
+      height: 84px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.10);
+    }
+    .usage-panel-free { background: linear-gradient(135deg, #00a870 0%, #007a52 100%); }
+    .usage-panel-busy { background: linear-gradient(135deg, #d93025 0%, #9f1d16 100%); }
+    .usage-panel-checking { background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%); }
+    .usage-panel-closed { background: linear-gradient(135deg, #8b95a1 0%, #59616d 100%); }
+    .usage-content { position: relative; z-index: 1; }
+    .usage-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+    .usage-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: .08em;
+      border-radius: 999px;
+      padding: 8px 14px;
+      background: rgba(255,255,255,.18);
+      color: #fff;
+      border: 1px solid rgba(255,255,255,.32);
+    }
+    .usage-dot { width: 13px; height: 13px; border-radius: 999px; background: #fff; box-shadow: 0 0 0 7px rgba(255,255,255,.18); }
+    .usage-icon {
+      width: 58px;
+      height: 58px;
+      border-radius: 18px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      font-weight: 900;
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.28);
+    }
+    .usage-title { font-size: clamp(3.1rem, 8vw, 5.1rem); font-weight: 900; line-height: .95; margin: 4px 0 10px; letter-spacing: .04em; }
+    .usage-message { font-size: 1.18rem; font-weight: 800; margin-bottom: 10px; }
+    .usage-detail { font-size: .98rem; color: rgba(255,255,255,.84); }
+    .usage-action-hint {
+      margin-top: 14px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      width: fit-content;
+      border-radius: 12px;
+      padding: 9px 12px;
+      background: rgba(255,255,255,.16);
+      font-weight: 700;
+    }
+    .checkout-area {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .btn-checkout {
+      border: 0;
+      border-radius: 16px;
+      padding: 14px 16px;
+      font-size: 1.15rem;
+      font-weight: 900;
+      color: #9f1d16;
+      background: rgba(255,255,255,.94);
+      box-shadow: 0 10px 22px rgba(0,0,0,.16);
+    }
+    .btn-checkout:hover { background: #fff; color: #7f1711; }
+    .btn-checkout:disabled { opacity: .7; cursor: not-allowed; }
+    .checkout-note { font-size: .88rem; color: rgba(255,255,255,.84); }
+    @media (max-width: 768px) { iframe { min-height: 430px; } .brand-area { flex-direction: column; align-items: flex-start; gap: 8px; } .brand-copy { border-left: 0; padding-left: 0; } .brand-logo { width: min(200px, 64vw); } .usage-box { min-height: 210px; padding: 18px; } .usage-title { font-size: clamp(2.8rem, 16vw, 4.4rem); } .usage-message { font-size: 1.05rem; } }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
+      <div class="brand-area">
+        <img class="brand-logo" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyODEgNTgiIHdpZHRoPSIyODEiIGhlaWdodD0iNTgiPgogIDxzdHlsZT4KICAgIDpyb290IHsKICAgICAgLS1jMTogIzAwMDA4MDsgLyog4piFIOODoeOCpOODs+OCq+ODqeODvO+8iOWhl+OCiu+8iSovCiAgICAgIC0tczE6ICMwMDAwODA7IC8qIOKYhSDjgrnjg4jjg63jg7zjgq/jgqvjg6njg7wgKi8KICAgICAgLS1zdzogMC45OTIxOyAvKiDjgrnjg4jjg63jg7zjgq/luYUgKi8KICAgIH0KICA8L3N0eWxlPgoKICA8IS0tIEgg5a2XIC0tPgogIDxwYXRoIGZpbGw9InZhcigtLWMxKSIgc3Ryb2tlPSJ2YXIoLS1zMSkiIHN0cm9rZS13aWR0aD0idmFyKC0tc3cpIgogICAgZD0iTTMuMzAyLDMyLjc1MmMwLDEuNTA0LDAuNTk3LDIuOTQ1LDEuNjYxLDQuMDA5YzEuMDYzLDEuMDYzLDIuNTA1LDEuNjYsNC4wMDksMS42NmMxLjUwMywwLDIuOTQ1LTAuNTk4LDQuMDA5LTEuNjYKICAgIGMxLjA2My0xLjA2MywxLjY2LTIuNTA1LDEuNjYtNC4wMDl2LTUuNjY5aDM0LjAxNnY1LjY2OWMwLDEuNTA0LDAuNTk4LDIuOTQ1LDEuNjYxLDQuMDA5YzEuMDYzLDEuMDYzLDIuNTA1LDEuNjYsNC4wMDksMS42NgogICAgYzEuNTAzLDAsMi45NDUtMC41OTgsNC4wMDktMS42NmMxLjA2My0xLjA2MywxLjY2LTIuNTA1LDEuNjYtNC4wMDlWMTAuMDc0YzAtMS41MDMtMC41OTgtMi45NDUtMS42Ni00LjAwOQogICAgYy0xLjA2My0xLjA2My0yLjUwNi0xLjY2LTQuMDA5LTEuNjZjLTEuNTA0LDAtMi45NDYsMC41OTctNC4wMDksMS42NmMtMS4wNjMsMS4wNjMtMS42NjEsMi41MDUtMS42NjEsNC4wMDl2NS42NjlIMTQuNjQxdi01LjY2OQogICAgYzAtMS41MDMtMC41OTctMi45NDUtMS42Ni00LjAwOWMtMS4wNjMtMS4wNjMtMi41MDUtMS42Ni00LjAwOS0xLjY2Yy0xLjUwNCwwLTIuOTQ2LDAuNTk3LTQuMDA5LDEuNjYKICAgIGMtMS4wNjMsMS4wNjMtMS42NjEsMi41MDUtMS42NjEsNC4wMDlWMzIuNzUyIi8+CgogIDwhLS0gSSDlrZfvvIjnuKbmo5LvvIkgLS0+CiAgPHBhdGggZmlsbD0idmFyKC0tYzEpIiBzdHJva2U9InZhcigtLXMxKSIKICAgIGQ9Ik02NS42NjQsMTcuNzg1djE0Ljk2N2MwLDEuNTA0LDAuNTk4LDIuOTQ1LDEuNjYxLDQuMDA5YzEuMDYzLDEuMDYzLDIuNTA1LDEuNjYsNC4wMDksMS42NgogICAgYzEuNTAzLDAsMi45NDUtMC41OTgsNC4wMDktMS42NmMxLjA2My0xLjA2MywxLjY2LTIuNTA1LDEuNjYtNC4wMDlWMTcuNzg1SDY1LjY2NCIvPgoKICA8IS0tIEkg5a2X77yI5LiK5Li477yJIC0tPgogIDxwYXRoIGZpbGw9InZhcigtLWMxKSIgc3Ryb2tlPSJ2YXIoLS1zMSkiIHN0cm9rZS13aWR0aD0idmFyKC0tc3cpIgogICAgZD0iTTY0LjUzLDEwLjA3NGMwLDEuMzgyLDAuNzE3LDIuNzA4LDEuOTkzLDMuNjg1YzEuMjc1LDAuOTc4LDMuMDA2LDEuNTI2LDQuODExLDEuNTI2CiAgICBjMS44MDQsMCwzLjUzNC0wLjU0OSw0LjgxMS0xLjUyNmMxLjI3NS0wLjk3NywxLjk5Mi0yLjMwMywxLjk5Mi0zLjY4NWMwLTEuMzgyLTAuNzE3LTIuNzA4LTEuOTkyLTMuNjg1CiAgICBjLTEuMjc2LTAuOTc4LTMuMDA3LTEuNTI2LTQuODExLTEuNTI2Yy0xLjgwNSwwLTMuNTM1LDAuNTQ5LTQuODExLDEuNTI2QzY1LjI0Nyw3LjM2Nyw2NC41Myw4LjY5Miw2NC41MywxMC4wNzQiLz4KCiAgPCEtLSBSIOWtlyAtLT4KICA8bGluZSBmaWxsPSJub25lIiBzdHJva2U9InZhcigtLXMxKSIgc3Ryb2tlLXdpZHRoPSJ2YXIoLS1zdykiIHgxPSIxMDAuNjkiIHkxPSIzMy4zNTYiIHgyPSIxNDYuODk1IiB5Mj0iNTQuOTAyIi8+CiAgPHBhdGggZmlsbD0idmFyKC0tYzEpIiBzdHJva2U9InZhcigtLXMxKSIgc3Ryb2tlLXdpZHRoPSJ2YXIoLS1zdykiCiAgICBkPSJNMTQ2Ljg5NSw1NC45MDJjMS4zNjEsMC42MzIsMi45MTksMC42OTcsNC4zMjksMC4xODNjMS40MTEtMC41MTQsMi41Ni0xLjU2NiwzLjE5NS0yLjkyNwogICAgYzAuNjM1LTEuMzYsMC43MDQtMi45MTgsMC4xOTMtNC4zMjlzLTEuNTYyLTIuNTYzLTIuOTIxLTMuMjAxbC0yNy45LTEzLjAxaDYuNTAzYzMuMTgzLTAuNTg0LDYuMDYxLTIuMjY1LDguMTMyLTQuNzUxCiAgICBzMy4yMDYtNS42MiwzLjIwNi04Ljg1NmMwLTMuMjM2LTEuMTM0LTYuMzctMy4yMDYtOC44NTVzLTQuOTQ5LTQuMTY3LTguMTMyLTQuNzVIODguMzQyYy0xLjUwNCwwLTIuOTQ2LDAuNTk3LTQuMDA5LDEuNjYKICAgIGMtMS4wNjMsMS4wNjMtMS42NjEsMi41MDUtMS42NjEsNC4wMDl2MjIuNjc4YzAsMS41MDQsMC41OTcsMi45NDUsMS42NjEsNC4wMDljMS4wNjMsMS4wNjMsMi41MDUsMS42Niw0LjAwOSwxLjY2CiAgICBjMS41MDMsMCwyLjk0NS0wLjU5OCw0LjAwOS0xLjY2YzEuMDYzLTEuMDYzLDEuNjYtMi41MDUsMS42Ni00LjAwOVYxMy40NzZoMzEuNzQ4YzEuMjAzLDAsMi4zNTYsMC40NzgsMy4yMDcsMS4zMjgKICAgIHMxLjMyOSwyLjAwNCwxLjMyOSwzLjIwN2MwLDEuMjAzLTAuNDc4LDIuMzU2LTEuMzI5LDMuMjA3cy0yLjAwNCwxLjMyOS0zLjIwNywxLjMyOWgtMjIuNjc3Yy0xLjI5MSwwLTIuNTQzLDAuNDQtMy41NDksMS4yNDkKICAgIGMtMS4wMDYsMC44MDktMS43MDcsMS45MzYtMS45ODYsMy4xOTZzLTAuMTE5LDIuNTc5LDAuNDUzLDMuNzM2czEuNTIxLDIuMDg0LDIuNjkxLDIuNjI5Ii8+CgogIDwhLS0gTyDlrZcgLS0+CiAgPHBhdGggZmlsbD0idmFyKC0tYzEpIiBzdHJva2U9InZhcigtLXMxKSIgc3Ryb2tlLXdpZHRoPSJ2YXIoLS1zdykiCiAgICBkPSJNMTQ0Ljc1MSwyMS40MTNjMC00LjQ2MSwzLjM0NS04Ljc0LDkuMjk5LTExLjg5NXMxNC4wMjktNC45MjcsMjIuNDQ5LTQuOTI3czE2LjQ5NSwxLjc3MiwyMi40NDksNC45MjcKICAgIHM5LjI5OSw3LjQzNCw5LjI5OSwxMS44OTVzLTMuMzQ1LDguNzQtOS4yOTksMTEuODk2Yy01Ljk1NCwzLjE1NC0xNC4wMjksNC45MjctMjIuNDQ5LDQuOTI3cy0xNi40OTUtMS43NzItMjIuNDQ5LTQuOTI3CiAgICBDMTQ4LjA5NiwzMC4xNTMsMTQ0Ljc1MSwyNS44NzUsMTQ0Ljc1MSwyMS40MTMgTTE1Ni40NTIsMjEuNDEzYzAsMi42NTgsMi4xMTIsNS4yMDgsNS44NzEsNy4wODcKICAgIGMzLjc2MSwxLjg4LDguODU4LDIuOTM2LDE0LjE3NiwyLjkzNmM1LjMxNiwwLDEwLjQxNi0xLjA1NiwxNC4xNzUtMi45MzZjMy43Ni0xLjg4LDUuODcyLTQuNDI5LDUuODcyLTcuMDg3CiAgICBzLTIuMTEyLTUuMjA4LTUuODcyLTcuMDg3Yy0zLjc1OS0xLjg4LTguODU4LTIuOTM2LTE0LjE3NS0yLjkzNmMtNS4zMTcsMC0xMC40MTUsMS4wNTYtMTQuMTc2LDIuOTM2CiAgICBDMTU4LjU2NCwxNi4yMDUsMTU2LjQ1MiwxOC43NTUsMTU2LjQ1MiwyMS40MTMiLz4KCiAgPCEtLSBYIOWtlyAtLT4KICA8cGF0aCBmaWxsPSJ2YXIoLS1jMSkiIHN0cm9rZT0idmFyKC0tczEpIiBzdHJva2Utd2lkdGg9InZhcigtLXN3KSIKICAgIGQ9Ik0yNzQuMTQ3LDI3LjQ5M2MxLjM5NiwwLjU2MywyLjUwOSwxLjY1NiwzLjA5OCwzLjA0MWMwLjU4OSwxLjM4MywwLjYwMywyLjk0NCwwLjA0LDQuMzQKICAgIGMtMC41NjMsMS4zOTUtMS42NTUsMi41MDgtMy4wNCwzLjA5OGMtMS4zODQsMC41ODgtMi45NDQsMC42MDMtNC4zMzksMC4wNGwtMjcuMzYyLTEwLjk0M2wtMjcuNDY3LDEwLjk4NwogICAgYy0xLjExOSwwLjQyNC0yLjM0NSwwLjQ4NC0zLjUsMC4xN2MtMS4xNTYtMC4zMTQtMi4xODMtMC45ODctMi45MzMtMS45MjJjLTAuNzUxLTAuOTM0LTEuMTg2LTIuMDgtMS4yNDMtMy4yNzYKICAgIHMwLjI2NC0yLjM4MSwwLjkyMS0zLjM4M2MwLjY1Ni0xLjAwMSwxLjYxMi0xLjc3LDIuNzMyLTIuMTk1bDE2LjIyNi02LjQ4OWwtMTQuMTA0LTUuNjQxYy0xLjM4Mi0wLjU2OS0yLjQ4NC0xLjY2LTMuMDY1LTMuMDM2CiAgICBjLTAuNTgyLTEuMzc2LTAuNTk3LTIuOTI2LTAuMDQyLTQuMzEzczEuNjM1LTIuNSwzLjAwNS0zLjA5NXMyLjkyMS0wLjYyNiw0LjMxMy0wLjA4NWwyNS4xNjEsMTAuMDYzTDI2Ny42NTEsNC44MQogICAgYzEuMTEyLTAuNDQ1LDIuMzM3LTAuNTI3LDMuNDk3LTAuMjMzYzEuMTYyLDAuMjk0LDIuMiwwLjk0NywyLjk2NywxLjg2OGMwLjc2NywwLjkyLDEuMjIzLDIuMDYsMS4zMDIsMy4yNTQKICAgIGMwLjA3OSwxLjE5NS0wLjIyMiwyLjM4NS0wLjg2LDMuMzk4Yy0wLjYzOCwxLjAxNC0xLjU4MSwxLjc5OS0yLjY5MywyLjI0M2wtMTQuMDUxLDUuNjJMMjc0LjE0NywyNy40OTMiLz4KCjwvc3ZnPgo=" alt="ロゴ">
+        <div class="brand-copy">
+          <h1 class="h3 mb-1">フリー室3</h1>
+        </div>
+      </div>
+      <div class="text-end">
+        <div id="clock" class="big-time">--:--</div>
+        <div id="today" class="text-secondary"></div>
+      </div>
+    </div>
+
+    <div class="row g-3">
+      <div class="col-lg-4">
+        <div class="card mb-3">
+          <div class="card-body">
+          
+            <div id="currentUsage" class="usage-box usage-panel-checking mb-3">
+              <div class="usage-content">
+                <div class="usage-top"><span class="usage-label"><span class="usage-dot"></span>確認中</span><span class="usage-icon">…</span></div>
+                <div class="usage-title">CHECK</div>
+                <div class="usage-message">利用状況を確認しています。</div>
+              </div>
+            </div>
+            <div id="status" class="alert alert-info">空き状況を確認しています...</div>
+            <form id="quickForm" onsubmit="reserveNow(event)">
+              <div class="mb-3">
+                <label class="form-label" for="startTime">開始時刻</label>
+                <select class="form-select form-select-lg" id="startTime" required onchange="loadDurationsForSelectedStart()"></select>
+               
+              </div>
+              <div class="mb-3">
+                <label class="form-label" for="durationMinutes">使用時間</label>
+                <select class="form-select form-select-lg" id="durationMinutes" required></select>
+              </div>
+              <button class="btn btn-primary w-100 btn-reserve" id="reserveBtn" type="submit">この内容で予約</button>
+            </form>
+            <button class="btn btn-outline-secondary w-100 mt-2" onclick="loadOptions()">更新</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="card">
+          <div class="card-body">
+          
+           <iframe
+  id="calendarFrame"
+  data-base-src="https://calendar.google.com/calendar/embed?src=50a678a08b4f8ebb79405c1c476157a5a0b65dd59c8722e91feba1434e2753eb%40group.calendar.google.com&ctz=Asia%2FTokyo&mode=WEEK"
+  src="https://calendar.google.com/calendar/embed?src=50a678a08b4f8ebb79405c1c476157a5a0b65dd59c8722e91feba1434e2753eb%40group.calendar.google.com&ctz=Asia%2FTokyo&mode=WEEK"
+  style="border: 0"
+  width="800"
+  height="600"
+  frameborder="0"
+  scrolling="no">
+</iframe>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // GASをWebアプリとしてデプロイ後、「ウェブアプリURL」を貼り付けてください。
+  const GAS_ENDPOINT = 'https://script.google.com/macros/s/AKfycbx8bTCgmSMLnTPOb9xTxLE5t0nDfXyfL2v8EXMGvfuyg4bjCaggJ6DP2bk7CxCpI-EZ/exec';
+
+  // GASのSettingsシートのGAS_API_KEYと同じ値にしてください。
+  const API_KEY = '8169';
+
+  // SettingsシートのQUICK_RESOURCE_IDと合わせてください。
+  const RESOURCE_ID = 'room-6';
+
+  // 利用可能時間はGASのResourceシート由来の値を使用します。
+  // HTML側には固定の営業時間を持たせません。
+  let operatingHours = { startTime: '', endTime: '' };
+  let currentUsingReservation = null;
+  // quickOptionsで本日の予約候補が0件だった場合も、空室ではなく時間外扱いにします。
+  let noAvailableStartsForToday = false;
+  let latestOptions = null;
+  const CALENDAR_AUTO_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+
+  document.addEventListener('DOMContentLoaded', () => {
+    tickClock();
+    setInterval(tickClock, 10000);
+    loadOptions({ refreshCalendarFrame: true });
+    setInterval(() => loadOptions({ refreshCalendarFrame: true }), 60000);
+    setInterval(refreshCurrentStatus, 30000);
+    setInterval(refreshCalendar, CALENDAR_AUTO_REFRESH_INTERVAL_MS);
+  });
+
+  function tickClock() {
+    const now = new Date();
+    document.getElementById('clock').textContent = now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    document.getElementById('today').textContent = now.toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'short' });
+  }
+
+  function jsonp(params) {
+    return new Promise((resolve, reject) => {
+      if (!GAS_ENDPOINT || GAS_ENDPOINT.includes('ここに')) {
+        reject(new Error('GAS_ENDPOINTが未設定です。HTML内の設定を書き換えてください。'));
+        return;
+      }
+      const callbackName = 'gasCallback_' + Date.now() + '_' + Math.floor(Math.random() * 100000);
+      params.callback = callbackName;
+      params.apiKey = API_KEY;
+      params.resourceId = RESOURCE_ID;
+      const url = GAS_ENDPOINT + (GAS_ENDPOINT.includes('?') ? '&' : '?') + new URLSearchParams(params).toString();
+      const script = document.createElement('script');
+      const timer = setTimeout(() => {
+        cleanup();
+        reject(new Error('GAS APIの応答がタイムアウトしました。'));
+      }, 30000);
+      function cleanup() {
+        clearTimeout(timer);
+        delete window[callbackName];
+        if (script.parentNode) script.parentNode.removeChild(script);
+      }
+      window[callbackName] = data => {
+        cleanup();
+        if (data && data.ok === false) reject(new Error(data.message || 'APIエラーです。'));
+        else resolve(data);
+      };
+      script.onerror = () => { cleanup(); reject(new Error('GAS APIを読み込めませんでした。URL、公開設定、APIキーを確認してください。')); };
+      script.src = url;
+      document.body.appendChild(script);
+    });
+  }
+
+  async function loadOptions(options = {}) {
+    const shouldRefreshCalendarFrame = options.refreshCalendarFrame !== false;
+    setStatus('info', '空き状況を確認しています...');
+    setBusy(true);
+    try {
+      const data = await jsonp({ api: 'quickOptions' });
+      latestOptions = data;
+      updateOperatingHours(data);
+      noAvailableStartsForToday = !data.starts || !data.starts.length;
+      renderCurrentStatus(data.currentStatus);
+      renderStartOptions(data.starts || [], data.defaultStartTime || '');
+      renderDurations(data.durations || []);
+      if (noAvailableStartsForToday) {
+        const hoursLabel = getOperatingHoursLabel();
+        setStatus('secondary', '現在は利用時間外です' + (hoursLabel ? '（利用可能時間 ' + hoursLabel + '）' : ''));
+      } else {
+        setStatus('success', data.dateLabel + ' ' + formatCurrentTimeLabel() + ' 現在');
+      }
+      if (shouldRefreshCalendarFrame) refreshCalendar();
+    } catch (err) {
+      setStatus('danger', err.message || String(err));
+      noAvailableStartsForToday = false;
+      renderCurrentStatus(null, err.message || String(err));
+      renderStartOptions([], '');
+      renderDurations([]);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function renderStartOptions(starts, defaultStart) {
+    const select = document.getElementById('startTime');
+    select.innerHTML = '';
+    if (!starts.length) {
+      select.appendChild(new Option('選択不可', ''));
+      return;
+    }
+    starts.forEach(t => select.appendChild(new Option(t, t)));
+    if (defaultStart && starts.includes(defaultStart)) select.value = defaultStart;
+  }
+
+  async function loadDurationsForSelectedStart() {
+    const startTime = document.getElementById('startTime').value;
+    if (!startTime) {
+      renderDurations([]);
+      return;
+    }
+    setBusy(true);
+    setStatus('info', '使用時間の候補を確認しています...');
+    try {
+      const data = await jsonp({ api: 'quickDurations', startTime: startTime });
+      renderDurations(data.durations || []);
+      if (!data.durations || !data.durations.length) setStatus('warning', 'この開始時刻で予約できる使用時間がありません。');
+      else setStatus('success', '選択した開始時刻で予約可能な使用時間を表示しています。');
+    } catch (err) {
+      setStatus('danger', err.message || String(err));
+      renderDurations([]);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function renderDurations(durations) {
+    const select = document.getElementById('durationMinutes');
+    select.innerHTML = '';
+    if (!durations.length) {
+      select.appendChild(new Option('選択不可', ''));
+      return;
+    }
+    durations.forEach(d => select.appendChild(new Option(d.label + '（終了 ' + d.endTime + '）', d.value)));
+    select.value = durations[0].value;
+  }
+
+  function formatCurrentTimeLabel() {
+    const now = new Date();
+    return now.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+  }
+
+
+  async function refreshCurrentStatus() {
+    try {
+      const data = await jsonp({ api: 'quickStatus' });
+      updateOperatingHours(data);
+      renderCurrentStatus(data.currentStatus);
+    } catch (err) {
+      renderCurrentStatus(null, err.message || String(err));
+    }
+  }
+
+  function renderCurrentStatus(status, errorMessage) {
+    const el = document.getElementById('currentUsage');
+    if (!el) return;
+    if (!errorMessage && isOutsideOperatingHours(status)) {
+      renderClosedStatus(el, status);
+      return;
+    }
+    if (errorMessage) {
+      el.className = 'usage-box usage-panel-busy mb-3';
+      el.innerHTML = '<div class="usage-content">' +
+        '<div class="usage-top"><span class="usage-label"><span class="usage-dot"></span>確認失敗</span><span class="usage-icon">!</span></div>' +
+        '<div class="usage-title">ERROR</div>' +
+        '<div class="usage-message">現在の利用状況を取得できませんでした。</div>' +
+        '<div class="usage-detail">' + escapeHtml(errorMessage) + '</div>' +
+        '</div>';
+      return;
+    }
+    if (!status) {
+      el.className = 'usage-box usage-panel-checking mb-3';
+      el.innerHTML = '<div class="usage-content">' +
+        '<div class="usage-top"><span class="usage-label"><span class="usage-dot"></span>確認中</span><span class="usage-icon">…</span></div>' +
+        '<div class="usage-title">CHECK</div>' +
+        '<div class="usage-message">現在の利用状況を確認しています。</div>' +
+        '<div class="usage-detail">しばらくお待ちください。</div>' +
+        '</div>';
+      return;
+    }
+    if (status.using) {
+      currentUsingReservation = status;
+      const detail = escapeHtml((status.startTime || '') + ' - ' + (status.endTime || '') + ' / 確認 ' + (status.checkedAt || ''));
+      el.className = 'usage-box usage-panel-busy mb-3';
+      el.innerHTML = '<div class="usage-content">' +
+        '<div class="usage-top"><span class="usage-label"><span class="usage-dot"></span>使用中</span><span class="usage-icon">×</span></div>' +
+        '<div class="usage-title">使用中</div>' +
+        '<div class="usage-message">' + escapeHtml(status.message || 'ただいま利用中です。') + '</div>' +
+        '<div class="usage-detail">' + detail + '</div>' +
+        '<div class="checkout-area">' +
+          '<button class="btn-checkout" id="checkoutBtn" type="button" onclick="checkoutNow()">退出して現在時刻で終了</button>' +
+        '</div>' +
+        '</div>';
+    } else {
+      currentUsingReservation = null;
+      el.className = 'usage-box usage-panel-free mb-3';
+      el.innerHTML = '<div class="usage-content">' +
+        '<div class="usage-top"><span class="usage-label"><span class="usage-dot"></span>入室できます</span><span class="usage-icon">○</span></div>' +
+        '<div class="usage-title">空室</div>' +
+        '</div>';
+    }
+  }
+
+  function renderClosedStatus(el, status) {
+    const checkedAt = status && status.checkedAt ? status.checkedAt : formatCurrentTimeLabel();
+    const hoursLabel = getOperatingHoursLabel();
+    const detail = (hoursLabel ? '利用可能時間 ' + hoursLabel + ' / ' : '') + '確認 ' + checkedAt;
+    el.className = 'usage-box usage-panel-closed mb-3';
+    el.innerHTML = '<div class="usage-content">' +
+      '<div class="usage-top"><span class="usage-label"><span class="usage-dot"></span>利用時間外</span><span class="usage-icon">−</span></div>' +
+      '<div class="usage-title">時間外</div>' +
+      '<div class="usage-message">現在は会議室の利用時間外です。</div>' +
+      '<div class="usage-detail">' + escapeHtml(detail) + '</div>' +
+      '</div>';
+  }
+
+  function updateOperatingHours(data) {
+    const source = findOperatingHoursSource(data);
+    const startTime = normalizeTimeValue(
+      pickFirstValue(source, ['operatingStartTime', 'businessStartTime', 'usageStartTime', 'availableStartTime', 'openTime', 'startTime', 'start'])
+    );
+    const endTime = normalizeTimeValue(
+      pickFirstValue(source, ['operatingEndTime', 'businessEndTime', 'usageEndTime', 'availableEndTime', 'closeTime', 'endTime', 'end'])
+    );
+    if (startTime && endTime) {
+      operatingHours = { startTime, endTime };
+    }
+  }
+
+  function findOperatingHoursSource(data) {
+    const candidates = [];
+    if (data) {
+      candidates.push(data);
+      candidates.push(data.resource);
+      candidates.push(data.currentStatus);
+      candidates.push(data.businessHours);
+      candidates.push(data.operatingHours);
+      candidates.push(data.openHours);
+      if (data.currentStatus) {
+        candidates.push(data.currentStatus.resource);
+        candidates.push(data.currentStatus.businessHours);
+        candidates.push(data.currentStatus.operatingHours);
+        candidates.push(data.currentStatus.openHours);
+      }
+    }
+    return candidates.find(obj => obj && typeof obj === 'object' && hasAnyOperatingHourKey(obj)) || null;
+  }
+
+  function hasAnyOperatingHourKey(obj) {
+    const keys = ['operatingStartTime', 'businessStartTime', 'usageStartTime', 'availableStartTime', 'openTime', 'startTime', 'start', 'operatingEndTime', 'businessEndTime', 'usageEndTime', 'availableEndTime', 'closeTime', 'endTime', 'end'];
+    return keys.some(key => Object.prototype.hasOwnProperty.call(obj, key));
+  }
+
+  function pickFirstValue(obj, keys) {
+    if (!obj || typeof obj !== 'object') return '';
+    for (const key of keys) {
+      if (obj[key] != null && String(obj[key]).trim() !== '') return obj[key];
+    }
+    return '';
+  }
+
+  function getOperatingHoursLabel() {
+    if (!operatingHours.startTime || !operatingHours.endTime) return '';
+    return operatingHours.startTime + '〜' + operatingHours.endTime;
+  }
+
+  function isOutsideOperatingHours(status) {
+    if (status && status.outsideHours === true) return true;
+    if (status && status.isOutsideHours === true) return true;
+    if (status && status.withinBusinessHours === false) return true;
+
+    // GAS側の営業時間がレスポンスに含まれない環境でも、
+    // quickOptionsの予約候補が0件なら「空室」ではなく「時間外」として表示します。
+    // ただし現在使用中の場合は「使用中」を優先します。
+    if (noAvailableStartsForToday && !(status && status.using)) return true;
+
+    const startMinutes = timeToMinutes(operatingHours.startTime);
+    const endMinutes = timeToMinutes(operatingHours.endTime);
+    if (startMinutes == null || endMinutes == null) return false;
+
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    if (startMinutes <= endMinutes) {
+      return currentMinutes < startMinutes || currentMinutes >= endMinutes;
+    }
+    return currentMinutes < startMinutes && currentMinutes >= endMinutes;
+  }
+
+  function normalizeTimeValue(value) {
+    if (value == null) return '';
+    const text = String(value).trim();
+    const match = text.match(/(\d{1,2})[:：](\d{2})/);
+    if (!match) return '';
+    return String(Number(match[1])).padStart(2, '0') + ':' + match[2];
+  }
+
+  function timeToMinutes(value) {
+    const match = String(value || '').match(/^(\d{1,2}):(\d{2})$/);
+    if (!match) return null;
+    return Number(match[1]) * 60 + Number(match[2]);
+  }
+
+  function escapeHtml(value) {
+    return String(value == null ? '' : value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  async function reserveNow(event) {
+    event.preventDefault();
+    const startTime = document.getElementById('startTime').value;
+    const durationMinutes = document.getElementById('durationMinutes').value;
+    if (!startTime || !durationMinutes) return;
+
+    setBusy(true);
+    setStatus('info', '予約を登録しています...');
+    try {
+      const data = await jsonp({
+        api: 'quickReserve',
+        startTime: startTime,
+        durationMinutes: durationMinutes
+      });
+      setStatus('success', data.message + '<br>' + data.reservation.resourceName + ' / ' + data.reservation.dateLabel + ' ' + data.reservation.startTime + '-' + data.reservation.endTime);
+      await loadOptions({ refreshCalendarFrame: true });
+      setTimeout(refreshCalendar, 3000);
+    } catch (err) {
+      setStatus('danger', err.message || String(err));
+      await loadOptions();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+
+  async function checkoutNow() {
+    if (!currentUsingReservation || !currentUsingReservation.using) {
+      setStatus('warning', '現在使用中の予約が見つかりません。');
+      await refreshCurrentStatus();
+      return;
+    }
+    const nowLabel = formatCurrentTimeLabel();
+    const ok = window.confirm('現在時刻（' + nowLabel + '）を終了時刻として退出します。よろしいですか？');
+    if (!ok) return;
+
+    setBusy(true);
+    setCheckoutBusy(true);
+    setStatus('info', '退出処理を実行しています...');
+    try {
+      const params = { api: 'quickCheckout', checkoutTime: nowLabel };
+      const reservationKey = getCurrentReservationKey(currentUsingReservation);
+      if (reservationKey.key && reservationKey.value) params[reservationKey.key] = reservationKey.value;
+      const data = await jsonp(params);
+      setStatus('success', (data.message || '退出しました。終了時刻を現在時刻に更新しました。'));
+      currentUsingReservation = null;
+      await loadOptions({ refreshCalendarFrame: true });
+      setTimeout(refreshCalendar, 3000);
+    } catch (err) {
+      setStatus('danger', err.message || String(err));
+      await loadOptions({ refreshCalendarFrame: true });
+    } finally {
+      setCheckoutBusy(false);
+      setBusy(false);
+    }
+  }
+
+  function getCurrentReservationKey(status) {
+    if (!status || typeof status !== 'object') return { key: '', value: '' };
+    const keyMap = [
+      ['reservationId', 'reservationId'],
+      ['eventId', 'eventId'],
+      ['calendarEventId', 'eventId'],
+      ['id', 'reservationId']
+    ];
+    for (const pair of keyMap) {
+      if (status[pair[0]] != null && String(status[pair[0]]).trim() !== '') {
+        return { key: pair[1], value: String(status[pair[0]]).trim() };
+      }
+    }
+    return { key: '', value: '' };
+  }
+
+  function setCheckoutBusy(flag) {
+    const btn = document.getElementById('checkoutBtn');
+    if (btn) {
+      btn.disabled = !!flag;
+      btn.textContent = flag ? '退出処理中...' : '退出して現在時刻で終了';
+    }
+  }
+
+  function refreshCalendar() {
+    const frame = document.getElementById('calendarFrame');
+    if (!frame) return;
+    let baseSrc = frame.dataset.baseSrc || frame.src;
+    if (!/[?&]mode=/.test(baseSrc)) {
+      baseSrc += (baseSrc.includes('?') ? '&' : '?') + 'mode=WEEK';
+    }
+    const separator = baseSrc.includes('?') ? '&' : '?';
+    frame.src = baseSrc + separator + 'refresh=' + Date.now();
+  }
+
+  function setStatus(type, html) {
+    const el = document.getElementById('status');
+    el.className = 'alert alert-' + type;
+    el.innerHTML = html;
+  }
+
+  function setBusy(flag) {
+    document.getElementById('reserveBtn').disabled = !!flag;
+    setCheckoutBusy(flag);
+  }
+</script>
+</body>
+</html>
